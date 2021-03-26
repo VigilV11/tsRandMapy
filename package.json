@@ -1,0 +1,23 @@
+{
+  "name": "tsRandMapy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "parcel ./public/index.html",
+    "build": "parcel build ./publicindex.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/faker": "^5.1.7",
+    "@types/leaflet": "^1.7.0",
+    "parcel-bundler": "^1.12.5",
+    "typescript": "^4.2.3"
+  },
+  "dependencies": {
+    "faker": "^5.5.0",
+    "leaflet": "^1.7.1"
+  }
+}
