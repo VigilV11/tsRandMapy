@@ -132719,11 +132719,13 @@ var User =
 /** @class */
 function () {
   function User() {
+    this.markerClassName = 'marker-user';
     this.name = faker_1.default.name.firstName() + ' ' + faker_1.default.name.lastName();
     this.location = {
       lat: +faker_1.default.address.latitude(),
       lng: +faker_1.default.address.longitude()
     };
+    this.markerDisplayInfo = "Employee: " + this.name;
   }
 
   return User;
@@ -132749,11 +132751,13 @@ var Company =
 /** @class */
 function () {
   function Company() {
+    this.markerClassName = 'marker-user';
     this.name = faker_1.default.company.companyName();
     this.location = {
       lat: +faker_1.default.address.latitude(),
       lng: +faker_1.default.address.longitude()
     };
+    this.markerDisplayInfo = "<h3>Company: " + this.name + "</h3>";
   }
 
   return Company;
@@ -146858,18 +146862,24 @@ var Map =
 /** @class */
 function () {
   function Map() {
-    this.map = null;
+    this.map = null; //   private map: any = null;
+
     this.mapZoomLevel = 1;
     this.allMarkers = [];
   }
 
-  Map.prototype.loadMap = function (lat, lng) {
-    this.map = leaflet_1.default.map('map').setView([lat, lng], this.mapZoomLevel); // second parameter is the map zoom level
+  Map.prototype.loadMap = function (_a) {
+    var lat = _a.lat,
+        lng = _a.lng;
+    this.map = leaflet_1.default.map('map').setView([lat, lng], 10); // second parameter is the map zoom level
 
     leaflet_1.default.tileLayer(constants_1.mapAPIOpenStreetMap, constants_1.mapAttributionOpenStreetMap).addTo(this.map);
   };
 
-  Map.prototype.panToCoordinates = function (lat, lng) {
+  Map.prototype.panToCoordinates = function (_a) {
+    var lat = _a.lat,
+        lng = _a.lng;
+
     if (!this.map) {
       console.error('You should load the map first (use "loadMap" method)!');
       return;
@@ -146877,23 +146887,18 @@ function () {
 
     this.map.setView([lat, lng], this.mapZoomLevel, {
       animate: true,
-      pan: {
-        duration: 1
-      }
+      duration: 1 //   pan: {
+      //     duration: 3,
+      //   },
+
     });
   };
 
-  Map.prototype.addMarker = function (lat, lng, type, data) {
-    this.panToCoordinates(lat, lng);
-    var hexColor1 = '12a451';
-    var hexColor2 = 'f248a1';
-    var myIcon = leaflet_1.default.icon({
-      iconUrl: "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + (type === 'user' ? hexColor1 : hexColor2) + "&chf=a,s,ee00FFFF" // iconAnchor: pinAnchor;
+  Map.prototype.addMarker = function (markerObj) {
+    this.panToCoordinates(markerObj.location); // If you want to add a custom marker pin use this format
+    // this.marker = L.marker([lat, lng], { icon: myIcon }).addTo(this.map); // Add marker to map
 
-    });
-    this.marker = leaflet_1.default.marker([lat, lng], {
-      icon: myIcon
-    }).addTo(this.map); // Add marker to map
+    this.marker = leaflet_1.default.marker([markerObj.location.lat, markerObj.location.lng]).addTo(this.map); // Add marker to map
 
     this.allMarkers.push(this.marker); // Customize tool tip
 
@@ -146902,9 +146907,9 @@ function () {
       minWidth: 100,
       autoClose: false,
       closeOnClick: false,
-      className: type === 'user' ? 'user-popup' : 'company-popup'
+      className: markerObj.markerClassName
     };
-    this.marker.bindPopup(leaflet_1.default.popup(popupOptions)).setPopupContent(data).openPopup();
+    this.marker.bindPopup(leaflet_1.default.popup(popupOptions)).setPopupContent(markerObj.markerDisplayInfo).openPopup();
   };
 
   Map.prototype.clearMarkers = function () {
@@ -146914,6 +146919,18 @@ function () {
       return _this.map.removeLayer(mark);
     });
     this.allMarkers = [];
+  }; // For future use - if you want to add a custom icon based on the type of pin
+  // private for now
+
+
+  Map.prototype.marMarkerIcon = function (hexColor) {
+    if (hexColor === void 0) {
+      hexColor = '12a451';
+    }
+
+    var myIcon = leaflet_1.default.icon({
+      iconUrl: "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + hexColor + "&chf=a,s,ee00FFFF"
+    });
   };
 
   return Map;
@@ -146943,21 +146960,20 @@ var Map_1 = __importDefault(require("./Map")); // DOM Nodes
 var generateBtn = document.querySelector('.genBtn');
 var infoText = document.querySelector('.info'); // Initial lat, lng values
 
-var _a = [51.5074, 0.1278],
-    lat = _a[0],
-    lng = _a[1]; // London
+var location = {
+  lat: 51.5074,
+  lng: 0.1278
+}; // London
 
 var map = new Map_1.default();
-map.loadMap(lat, lng);
+map.loadMap(location);
 generateBtn.addEventListener('click', function () {
   var newUser = new User_1.default();
   var newCompany = new Company_1.default();
   infoText.innerHTML = "<strong>" + newUser.name + "</strong> works for <em>" + newCompany.name + "</em>";
-  map.clearMarkers(); // prettier-ignore
-
-  map.addMarker(newUser.location.lat, newUser.location.lng, 'user', "Employee: " + newUser.name); // prettier-ignore
-
-  map.addMarker(newCompany.location.lat, newCompany.location.lng, 'company', "Company: " + newCompany.name);
+  map.clearMarkers();
+  map.addMarker(newUser);
+  map.addMarker(newCompany);
 });
 },{"./User":"../src/User.ts","./Company":"../src/Company.ts","./Map":"../src/Map.ts"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
